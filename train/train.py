@@ -2,6 +2,7 @@ import os
 import tensorflow as tf
 import csv
 from sklearn.model_selection import train_test_split
+
 from train.utils import SELECTED_COLOR, SELECTED_STRATEGY, TRAIN_IMAGE_DIR, TRAIN_LABEL_DIR, IMG_SIZE, BATCH_SIZE, EPOCHS, HELMET_CLASS_ID, SEED
 from model.model_10 import main_cnn  # CNN 모델 불러오기
 
@@ -74,10 +75,10 @@ def train_model(selected_color, selected_strategy, model_save_dir):
         raise ValueError("⚠ 데이터셋이 비어 있습니다. 경로와 파일 확인 필요")
 
     # -------------------------------
-    # train / val split (8:2)
+    # train / val split (9:1)
     # -------------------------------
     train_paths, val_paths, train_labels, val_labels = train_test_split(
-        img_paths, labels, test_size=0.2, random_state=SEED, stratify=labels
+        img_paths, labels, test_size=0.1, random_state=SEED, stratify=labels
     )
 
     train_ds = make_dataset(train_paths, train_labels, shuffle=True)

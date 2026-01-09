@@ -3,8 +3,8 @@ from datetime import datetime
 
 from data_prep.utils import TARGET_SIZE
 
-SELECTED_COLOR = 'color'  # 'color' 또는 'gray' 선택
-SELECTED_STRATEGY = 3  # 1, 2, 또는 3 선택
+SELECTED_COLOR = 'gray'  # 'color' 또는 'gray' 선택
+SELECTED_STRATEGY = 3  # 1 ~ 4 선택
 
 # ===============================
 # 데이터셋 경로
@@ -17,6 +17,7 @@ SUB_DIRS = {
     1: '1. forced_scale',
     2: '2. padded_scale',
     3: '3. aspect_aware_crop',
+    4: '4. replicate_padded_scale',
 }
 
 TRAIN_IMAGE_DIR = os.path.join(
@@ -58,9 +59,15 @@ def get_train_model_save_dir(color, strategy):
 # ===============================
 IMG_SIZE = TARGET_SIZE
 BATCH_SIZE = 32
-EPOCHS = 10
+EPOCHS = 200
 HELMET_CLASS_ID = 1
 SEED = 42
+
+# ===============================
+# 학습(Cross Validation) 관련 상수
+# ===============================
+N_FOLDS = 9
+RUN_TIMES = 10 # 전체 Cross Validation 반복 횟수
 
 # # ===============================
 # # 특정 epoch 모델 별도 저장
