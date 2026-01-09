@@ -1,0 +1,11 @@
+=== Test Results ===
+Color      : color
+Strategy   : 3
+Set        : 6
+Fold       : 6
+Epoch      : 61
+----------------------------------------
+Accuracy   : 0.8914
+Precision  : 0.8806
+Recall     : 0.9465
+F1-score   : 0.9124

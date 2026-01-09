@@ -1,0 +1,9 @@
+학습 관련 상수 및 하이퍼파라미터
+==============================
+FOLD: 4/9
+IMG_SIZE: (54, 64)
+BATCH_SIZE: 32
+EPOCHS: 200
+SEED: 51
+SELECTED_COLOR: gray
+SELECTED_STRATEGY: 4

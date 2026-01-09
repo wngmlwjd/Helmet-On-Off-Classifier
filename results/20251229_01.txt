@@ -1,0 +1,141 @@
+통합 실험 결과
+시작 시간: 2025-12-29 16:14:08
+모델: 4
+============================================================
+
+[COLOR=gray | STRATEGY=1]
+BEST FOLD : 4
+BEST EPOCH: 29
+VAL ACC   : 0.8683
+----------------------------------------
+=== Test Results ===
+Color    : gray
+Strategy : 1
+Epoch    : 29
+---------------------
+Accuracy : 0.8307
+Precision: 0.8575
+Recall   : 0.8621
+F1-score : 0.8598
+
+============================================================
+
+[COLOR=gray | STRATEGY=2]
+BEST FOLD : 3
+BEST EPOCH: 47
+VAL ACC   : 0.8802
+----------------------------------------
+=== Test Results ===
+Color    : gray
+Strategy : 2
+Epoch    : 47
+---------------------
+Accuracy : 0.8482
+Precision: 0.8653
+Recall   : 0.8859
+F1-score : 0.8755
+
+============================================================
+
+[COLOR=gray | STRATEGY=3]
+BEST FOLD : 2
+BEST EPOCH: 29
+VAL ACC   : 0.8563
+----------------------------------------
+=== Test Results ===
+Color    : gray
+Strategy : 3
+Epoch    : 29
+---------------------
+Accuracy : 0.8387
+Precision: 0.9107
+Recall   : 0.8117
+F1-score : 0.8583
+
+============================================================
+
+[COLOR=gray | STRATEGY=4]
+BEST FOLD : 5
+BEST EPOCH: 51
+VAL ACC   : 0.8820
+----------------------------------------
+=== Test Results ===
+Color    : gray
+Strategy : 4
+Epoch    : 51
+---------------------
+Accuracy : 0.8658
+Precision: 0.8949
+Recall   : 0.8806
+F1-score : 0.8877
+
+============================================================
+
+[COLOR=color | STRATEGY=1]
+BEST FOLD : 1
+BEST EPOCH: 54
+VAL ACC   : 0.8782
+----------------------------------------
+=== Test Results ===
+Color    : color
+Strategy : 1
+Epoch    : 54
+---------------------
+Accuracy : 0.8147
+Precision: 0.8145
+Recall   : 0.8966
+F1-score : 0.8535
+
+============================================================
+
+[COLOR=color | STRATEGY=2]
+BEST FOLD : 3
+BEST EPOCH: 56
+VAL ACC   : 0.9062
+----------------------------------------
+=== Test Results ===
+Color    : color
+Strategy : 2
+Epoch    : 56
+---------------------
+Accuracy : 0.8275
+Precision: 0.8078
+Recall   : 0.9363
+F1-score : 0.8673
+
+============================================================
+
+[COLOR=color | STRATEGY=3]
+BEST FOLD : 2
+BEST EPOCH: 22
+VAL ACC   : 0.8663
+----------------------------------------
+=== Test Results ===
+Color    : color
+Strategy : 3
+Epoch    : 22
+---------------------
+Accuracy : 0.8419
+Precision: 0.8357
+Recall   : 0.9178
+F1-score : 0.8748
+
+============================================================
+
+[COLOR=color | STRATEGY=4]
+BEST FOLD : 3
+BEST EPOCH: 44
+VAL ACC   : 0.8862
+----------------------------------------
+=== Test Results ===
+Color    : color
+Strategy : 4
+Epoch    : 44
+---------------------
+Accuracy : 0.8227
+Precision: 0.8009
+Recall   : 0.9390
+F1-score : 0.8645
+
+============================================================
+

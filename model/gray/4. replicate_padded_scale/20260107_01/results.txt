@@ -1,0 +1,130 @@
+========================================
+[SET 01]
+Best Fold : 4
+Best Epoch: 61
+Val Acc   : 0.8818
+
+--- Test Metrics ---
+Accuracy  : 0.8882
+Precision : 0.8918
+Recall    : 0.9251
+F1-score  : 0.9081
+========================================
+
+========================================
+[SET 02]
+Best Fold : 5
+Best Epoch: 42
+Val Acc   : 0.9105
+
+--- Test Metrics ---
+Accuracy  : 0.8722
+Precision : 0.9016
+Recall    : 0.8824
+F1-score  : 0.8919
+========================================
+
+========================================
+[SET 03]
+Best Fold : 2
+Best Epoch: 35
+Val Acc   : 0.9010
+
+--- Test Metrics ---
+Accuracy  : 0.8722
+Precision : 0.8973
+Recall    : 0.8877
+F1-score  : 0.8925
+========================================
+
+========================================
+[SET 04]
+Best Fold : 3
+Best Epoch: 73
+Val Acc   : 0.8978
+
+--- Test Metrics ---
+Accuracy  : 0.8722
+Precision : 0.8848
+Recall    : 0.9037
+F1-score  : 0.8942
+========================================
+
+========================================
+[SET 05]
+Best Fold : 7
+Best Epoch: 46
+Val Acc   : 0.8882
+
+--- Test Metrics ---
+Accuracy  : 0.8818
+Precision : 0.8827
+Recall    : 0.9251
+F1-score  : 0.9034
+========================================
+
+========================================
+[SET 06]
+Best Fold : 1
+Best Epoch: 52
+Val Acc   : 0.8786
+
+--- Test Metrics ---
+Accuracy  : 0.8754
+Precision : 0.8936
+Recall    : 0.8984
+F1-score  : 0.8960
+========================================
+
+========================================
+[SET 07]
+Best Fold : 4
+Best Epoch: 57
+Val Acc   : 0.8978
+
+--- Test Metrics ---
+Accuracy  : 0.8786
+Precision : 0.8782
+Recall    : 0.9251
+F1-score  : 0.9010
+========================================
+
+========================================
+[SET 08]
+Best Fold : 4
+Best Epoch: 29
+Val Acc   : 0.8690
+
+--- Test Metrics ---
+Accuracy  : 0.8754
+Precision : 0.8627
+Recall    : 0.9412
+F1-score  : 0.9003
+========================================
+
+========================================
+[SET 09]
+Best Fold : 9
+Best Epoch: 45
+Val Acc   : 0.9073
+
+--- Test Metrics ---
+Accuracy  : 0.8882
+Precision : 0.9043
+Recall    : 0.9091
+F1-score  : 0.9067
+========================================
+
+========================================
+[SET 10]
+Best Fold : 3
+Best Epoch: 61
+Val Acc   : 0.8914
+
+--- Test Metrics ---
+Accuracy  : 0.8914
+Precision : 0.9005
+Recall    : 0.9198
+F1-score  : 0.9101
+========================================
+
