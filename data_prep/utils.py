@@ -19,7 +19,8 @@ CUT_LABELS_DIR = CUT_DIR + "/labels"
 
 FILTER_SIZE = (100, 100)  # 최소 bbox 크기 기준 (픽셀 기준)
 
-TARGET_SIZE = (107, 128)  # 목표 크기 (width, height)
+# TARGET_SIZE = (107, 128)  # 목표 크기 (width, height)
+TARGET_SIZE = (54, 64)  # 목표 크기 (width, height)
 TARGET_ASPECT_RATIO = 0.8384  # 목표 종횡비 (너비/높이)
 
 PREPROCESSED_DIR = DATASET_DIR + "/preprocessed"
@@ -29,18 +30,21 @@ PREPROCESSED_GRAY_DIR = PREPROCESSED_DIR + "/gray"
 DATASET_TYPES = {
     'forced': "1. forced_scale",
     'padded': "2. padded_scale",
-    'aware': "3. aspect_aware_crop"
+    'aware': "3. aspect_aware_crop",
+    'replicate': "4. replicate_padded_scale",
 }
 
 OUTPUT_COLOR_DIRS = {
     'forced': PREPROCESSED_COLOR_DIR + '/1. forced_scale',
     'padded': PREPROCESSED_COLOR_DIR + '/2. padded_scale',
     'aware':  PREPROCESSED_COLOR_DIR + '/3. aspect_aware_crop',
+    'replicate': PREPROCESSED_COLOR_DIR + '/4. replicate_padded_scale',
 }
 OUTPUT_GRAY_DIRS = {
     'forced': PREPROCESSED_GRAY_DIR + '/1. forced_scale',
     'padded': PREPROCESSED_GRAY_DIR + '/2. padded_scale',
     'aware':  PREPROCESSED_GRAY_DIR + '/3. aspect_aware_crop',
+    'replicate': PREPROCESSED_GRAY_DIR + '/4. replicate_padded_scale',
 }
 
 

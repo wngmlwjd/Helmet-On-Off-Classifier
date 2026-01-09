@@ -75,6 +75,38 @@ def aspect_aware_crop(img, x_min, y_min, x_max, y_max):
     crop = img[y_min:y_max, x_min:x_max]
     return cv2.resize(crop, TARGET_SIZE)
 
+def replicate_padded_scale(img, x_min, y_min, x_max, y_max):
+    crop = img[y_min:y_max, x_min:x_max]
+    h, w = crop.shape[:2]
+
+    target_w, target_h = TARGET_SIZE
+    target_aspect = target_w / target_h
+    current_aspect = w / h
+
+    if current_aspect > target_aspect:
+        new_h = int(w / target_aspect)
+        pad_vert = new_h - h
+        pad_top = pad_vert // 2
+        pad_bottom = pad_vert - pad_top
+        padded = cv2.copyMakeBorder(
+            crop,
+            pad_top, pad_bottom, 0, 0,
+            cv2.BORDER_REPLICATE
+        )
+    else:
+        new_w = int(h * target_aspect)
+        pad_horz = new_w - w
+        pad_left = pad_horz // 2
+        pad_right = pad_horz - pad_left
+        padded = cv2.copyMakeBorder(
+            crop,
+            0, 0, pad_left, pad_right,
+            cv2.BORDER_REPLICATE
+        )
+
+    return cv2.resize(padded, TARGET_SIZE)
+
+
 def preprocess_dataset():
     ensure_dirs(OUTPUT_COLOR_DIRS)
     img_files = sorted(f for f in os.listdir(FILTERED_IMAGES_DIR) if f.lower().endswith(('.jpg','.png','.jpeg')))
@@ -115,6 +147,7 @@ def preprocess_dataset():
             save_image_and_label(forced_scale(img, x_min, y_min, x_max, y_max), cls, number, seq, os.path.join(OUTPUT_COLOR_DIRS['forced'], 'images'), os.path.join(OUTPUT_COLOR_DIRS['forced'], 'labels'))
             save_image_and_label(padded_scale(img, x_min, y_min, x_max, y_max), cls, number, seq, os.path.join(OUTPUT_COLOR_DIRS['padded'], 'images'), os.path.join(OUTPUT_COLOR_DIRS['padded'], 'labels'))
             save_image_and_label(aspect_aware_crop(img, x_min, y_min, x_max, y_max), cls, number, seq, os.path.join(OUTPUT_COLOR_DIRS['aware'], 'images'), os.path.join(OUTPUT_COLOR_DIRS['aware'], 'labels'))
+            save_image_and_label(replicate_padded_scale(img, x_min, y_min, x_max, y_max), cls, number, seq, os.path.join(OUTPUT_COLOR_DIRS['replicate'], 'images'), os.path.join(OUTPUT_COLOR_DIRS['replicate'], 'labels'))
 
     print("모든 이미지 처리 완료!")
 

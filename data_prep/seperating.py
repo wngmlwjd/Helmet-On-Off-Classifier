@@ -5,7 +5,7 @@ import random
 from data_prep.utils import OUTPUT_COLOR_DIRS, OUTPUT_GRAY_DIRS, DATASET_TYPES
 
 # train/test 비율
-TRAIN_RATIO = 0.8
+TRAIN_RATIO = 0.9
 
 def split_train_test_uniform(color_dirs, gray_dirs, output_root_color, output_root_gray):
     """

@@ -1,0 +1,3 @@
+1. preprocessing.py
+2. color_to_gray.py
+3. seperating.py
