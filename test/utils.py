@@ -18,6 +18,7 @@ SUB_DIRS = {
     1: '1. forced_scale',
     2: '2. padded_scale',
     3: '3. aspect_aware_crop',
+    4: '4. replicate_padded_scale',
 }
 
 TEST_IMAGE_DIR = os.path.join(
