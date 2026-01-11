@@ -1,56 +1,63 @@
 import os
 import tensorflow as tf
 import csv
+import numpy as np
 from sklearn.model_selection import train_test_split
 
-from train.utils import SELECTED_COLOR, SELECTED_STRATEGY, TRAIN_IMAGE_DIR, TRAIN_LABEL_DIR, IMG_SIZE, BATCH_SIZE, EPOCHS, HELMET_CLASS_ID, SEED
-from model.model_10 import main_cnn  # CNN 모델 불러오기
+from data_prep.utils import TRAIN_DATASET_DIR, TRAIN_IMAGES_DIR, TRAIN_LABELS_DIR, TEST_DATASET_DIR, TEST_IMAGES_DIR, TEST_LABELS_DIR
+from train.utils import HELMET_CLASS_ID, IMG_SIZE, BATCH_SIZE, EPOCHS
+from model.model_4 import main_cnn 
 
 # ===============================
 # 이미지 로드 함수
 # ===============================
-def load_image(path, label):
-    channels = 1 if SELECTED_COLOR == 'gray' else 3
+def preprocess_image(path, color):
+    channels = 1 if color == 'gray' else 3
     img = tf.io.read_file(path)
     img = tf.image.decode_image(img, channels=channels, expand_animations=False)
     img = tf.image.resize(img, (IMG_SIZE[1], IMG_SIZE[0]))
     img = tf.cast(img, tf.float32) / 255.0
     if channels == 1:
-        img = tf.expand_dims(img, axis=-1)  # (H, W, 1)
-    return img, label
+        img = tf.expand_dims(img, axis=-1)
+    return img
 
 # ===============================
 # Dataset 생성 함수
 # ===============================
-def make_dataset(paths, labels, shuffle=False):
+def make_train_val_dataset(paths, labels, color, shuffle=False):
     ds = tf.data.Dataset.from_tensor_slices((paths, labels))
     if shuffle:
         ds = ds.shuffle(buffer_size=len(paths), reshuffle_each_iteration=True)
-    ds = ds.map(load_image, num_parallel_calls=tf.data.AUTOTUNE)
+
+    ds = ds.map(
+        lambda path, label: (preprocess_image(path, color), label),
+        num_parallel_calls=tf.data.AUTOTUNE
+    )
+
     ds = ds.batch(BATCH_SIZE).prefetch(tf.data.AUTOTUNE)
     return ds
 
 # ===============================
-# 학습 함수
+# 학습 함수 (Single Train/Val)
 # ===============================
-def train_model(selected_color, selected_strategy, model_save_dir):
-    global SELECTED_COLOR, SELECTED_STRATEGY
-    SELECTED_COLOR = selected_color
-    SELECTED_STRATEGY = selected_strategy
-    TRAIN_MODEL_SAVE_DIR = model_save_dir
-    os.makedirs(TRAIN_MODEL_SAVE_DIR, exist_ok=True)
+def train_model(selected_color, selected_strategy, model_save_dir, val_split_ratio):
+    os.makedirs(model_save_dir, exist_ok=True)
 
     # -------------------------------
     # YOLO 라벨 기반 이미지/라벨 리스트 생성
     # -------------------------------
-    label_files = sorted([f for f in os.listdir(TRAIN_LABEL_DIR) if f.startswith("label_") and f.endswith(".txt")])
+    label_files = sorted([
+        f for f in os.listdir(TRAIN_LABELS_DIR)
+        if f.startswith("label_") and f.endswith(".txt")
+    ])
+
     img_paths, labels = [], []
 
     for label_file in label_files:
         base = label_file.replace("label_", "").replace(".txt", "")
         img_path = None
         for ext in [".jpg", ".png", ".jpeg"]:
-            fname = os.path.join(TRAIN_IMAGE_DIR, f"image_{base}{ext}")
+            fname = os.path.join(TRAIN_IMAGES_DIR, f"image_{base}{ext}")
             if os.path.exists(fname):
                 img_path = fname
                 break
@@ -58,10 +65,9 @@ def train_model(selected_color, selected_strategy, model_save_dir):
             continue
 
         has_helmet = 0
-        with open(os.path.join(TRAIN_LABEL_DIR, label_file), "r") as f:
+        with open(os.path.join(TRAIN_LABELS_DIR, label_file), "r") as f:
             for line in f:
-                line = line.strip()
-                if not line:
+                if not line.strip():
                     continue
                 class_id = int(line.split()[0])
                 if class_id == HELMET_CLASS_ID:
@@ -72,76 +78,106 @@ def train_model(selected_color, selected_strategy, model_save_dir):
         labels.append(has_helmet)
 
     if len(labels) == 0:
-        raise ValueError("⚠ 데이터셋이 비어 있습니다. 경로와 파일 확인 필요")
+        raise ValueError("⚠ 데이터셋이 비어 있습니다.")
+
+    img_paths = np.array(img_paths)
+    labels = np.array(labels)
 
     # -------------------------------
-    # train / val split (9:1)
+    # Train / Validation 분할
     # -------------------------------
     train_paths, val_paths, train_labels, val_labels = train_test_split(
-        img_paths, labels, test_size=0.1, random_state=SEED, stratify=labels
+        img_paths,
+        labels,
+        test_size=val_split_ratio,
+        stratify=labels,
     )
 
-    train_ds = make_dataset(train_paths, train_labels, shuffle=True)
-    val_ds   = make_dataset(val_paths, val_labels, shuffle=False)
+    train_ds = make_train_val_dataset(train_paths.tolist(), train_labels.tolist(), selected_color, shuffle=True)
+    val_ds   = make_train_val_dataset(val_paths.tolist(), val_labels.tolist(), selected_color, shuffle=False)
 
     # -------------------------------
-    # 모델 생성 & 학습
+    # 모델 생성
     # -------------------------------
+    tf.keras.backend.clear_session()
     model = main_cnn(selected_color)
-    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+    model.compile(
+        optimizer="adam",
+        loss="binary_crossentropy",
+        metrics=["accuracy"]
+    )
 
-    # 체크포인트 콜백
+    # -------------------------------
+    # Callbacks
+    # -------------------------------
     checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(TRAIN_MODEL_SAVE_DIR, "epoch_{epoch:02d}.h5"),
+        filepath=os.path.join(model_save_dir, "epoch_{epoch:02d}.h5"),
         save_weights_only=False,
         save_freq="epoch"
     )
+    earlystop_cb = tf.keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        patience=5,
+        restore_best_weights=True,
+        verbose=1
+    )
+    reduce_lr_cb = tf.keras.callbacks.ReduceLROnPlateau(
+        monitor="val_loss",
+        factor=0.5,
+        patience=3,
+        min_lr=1e-6,
+        verbose=1
+    )
 
-    # CSV 기록용 콜백
+    best_result = {}
+    
     class HistoryCSVCallback(tf.keras.callbacks.Callback):
         def on_train_end(self, logs=None):
             hist = self.model.history.history
             best_val_acc = max(hist['val_accuracy'])
             best_epoch = hist['val_accuracy'].index(best_val_acc) + 1
-            csv_path = os.path.join(TRAIN_MODEL_SAVE_DIR, "history.csv")
+
+            csv_path = os.path.join(model_save_dir, "history.csv")
             with open(csv_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                # 최고 검증 정확도 맨 앞에 기록
                 writer.writerow([f"Best Val Accuracy: {best_val_acc:.4f}", f"Epoch: {best_epoch}"])
-                writer.writerow([])  # 빈 줄
-                # 헤더 작성
+                writer.writerow([])
                 keys = list(hist.keys())
                 writer.writerow(["epoch"] + keys)
                 for i in range(len(hist[keys[0]])):
                     writer.writerow([i+1] + [hist[k][i] for k in keys])
-            print(f"✅ History CSV 저장 완료: {csv_path}")
 
-    # 학습 상수 TXT 저장
-    constants_txt_path = os.path.join(TRAIN_MODEL_SAVE_DIR, "training_constants.txt")
-    with open(constants_txt_path, "w", encoding="utf-8") as f:
+            print("✅ history.csv 저장 완료")
+            
+            best_result["best_epoch"] = best_epoch
+            best_result["best_val_acc"] = best_val_acc
+    
+    # -------------------------------
+    # 상수 기록
+    # -------------------------------
+    with open(os.path.join(model_save_dir, "training_constants.txt"), "w", encoding="utf-8") as f:
         f.write("학습 관련 상수 및 하이퍼파라미터\n")
         f.write("==============================\n")
-        f.write(f"TRAIN_IMAGE_DIR: {TRAIN_IMAGE_DIR}\n")
-        f.write(f"TRAIN_LABEL_DIR: {TRAIN_LABEL_DIR}\n")
-        f.write(f"TRAIN_MODEL_SAVE_DIR: {TRAIN_MODEL_SAVE_DIR}\n")
         f.write(f"IMG_SIZE: {IMG_SIZE}\n")
         f.write(f"BATCH_SIZE: {BATCH_SIZE}\n")
         f.write(f"EPOCHS: {EPOCHS}\n")
-        f.write(f"HELMET_CLASS_ID: {HELMET_CLASS_ID}\n")
-        f.write(f"SEED: {SEED}\n")
-        f.write(f"SELECTED_COLOR: {SELECTED_COLOR}\n")
-        f.write(f"SELECTED_STRATEGY: {SELECTED_STRATEGY}\n")
-        f.write(f"Callbacks: ModelCheckpoint\n")
-    print(f"✅ 학습 상수 TXT 저장 완료: {constants_txt_path}")
+        f.write(f"VAL_RATIO: {val_split_ratio}\n")
+        f.write(f"SELECTED_COLOR: {selected_color}\n")
+        f.write(f"SELECTED_STRATEGY: {selected_strategy}\n")
 
-    # 학습 실행
-    history = model.fit(
+    # -------------------------------
+    # 학습
+    # -------------------------------
+    model.fit(
         train_ds,
         validation_data=val_ds,
         epochs=EPOCHS,
-        callbacks=[checkpoint_cb, HistoryCSVCallback()]
+        callbacks=[
+            checkpoint_cb,
+            earlystop_cb,
+            reduce_lr_cb,
+            HistoryCSVCallback()
+        ]
     )
 
-    best_epoch = history.history['val_accuracy'].index(max(history.history['val_accuracy'])) + 1
-    print(f"▶ 학습 완료 (최고 검증 정확도 epoch: {best_epoch})")
-    return best_epoch
+    return best_result
