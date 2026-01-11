@@ -1,0 +1,7 @@
+=== Test Results (Epoch 49) ===
+Color      : gray
+Strategy   : 3
+Accuracy   : 0.8626
+Precision  : 0.8589
+Recall     : 0.9265
+F1-score   : 0.8914

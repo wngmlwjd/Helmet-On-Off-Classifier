@@ -1,0 +1,8 @@
+=== Test Results (AVERAGE + VARIANCE) ===
+Color      : gray
+Strategy   : 2
+----------------------------------------
+Accuracy   : 0.8623 (0.000190)
+Precision  : 0.8954 (0.000207)
+Recall     : 0.8781 (0.001611)
+F1-score   : 0.8859 (0.000263)

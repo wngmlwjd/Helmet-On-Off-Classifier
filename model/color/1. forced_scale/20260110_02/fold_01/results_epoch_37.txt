@@ -1,0 +1,7 @@
+=== Test Results (Epoch 37) ===
+Color      : color
+Strategy   : 1
+Accuracy   : 0.8706
+Precision  : 0.8984
+Recall     : 0.8865
+F1-score   : 0.8924

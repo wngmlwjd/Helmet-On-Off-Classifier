@@ -1,0 +1,7 @@
+=== Test Results (Epoch 58) ===
+Color      : color
+Strategy   : 4
+Accuracy   : 0.8802
+Precision  : 0.8967
+Recall     : 0.8992
+F1-score   : 0.8980

@@ -1,0 +1,7 @@
+=== Test Results (Epoch 74) ===
+Color      : gray
+Strategy   : 2
+Accuracy   : 0.8562
+Precision  : 0.8668
+Recall     : 0.9031
+F1-score   : 0.8846

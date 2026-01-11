@@ -1,0 +1,7 @@
+=== Test Results (Epoch 20) ===
+Color      : gray
+Strategy   : 3
+Accuracy   : 0.8307
+Precision  : 0.8672
+Recall     : 0.8582
+F1-score   : 0.8627

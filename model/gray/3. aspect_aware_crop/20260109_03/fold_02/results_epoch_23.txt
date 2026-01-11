@@ -1,0 +1,7 @@
+=== Test Results (Epoch 23) ===
+Color      : gray
+Strategy   : 3
+Accuracy   : 0.8179
+Precision  : 0.8333
+Recall     : 0.8846
+F1-score   : 0.8582
