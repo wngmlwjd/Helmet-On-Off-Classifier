@@ -1,69 +1,90 @@
-import os
 import re
 import numpy as np
+from collections import defaultdict
+import os
 
-from train.utils import SUB_DIRS
+# =========================
+# 사용자 설정 부분
+# =========================
+input_files = [
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260109_01.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260109_02.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260109_03.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260109_04.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260109_05.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260109_06.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260109_07.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260109_08.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260110_01.txt",
+    r"/Users/wngmlwjd/workspace/github/helmet-on-off-classifier/results/20260110_02.txt",
+]
 
-def compute_avg_var_from_results(results_txt_path):
-    patterns = {
-        "accuracy":  re.compile(r"Accuracy\s*:\s*([0-9.]+)"),
-        "precision": re.compile(r"Precision\s*:\s*([0-9.]+)"),
-        "recall":    re.compile(r"Recall\s*:\s*([0-9.]+)"),
-        "f1":        re.compile(r"F1-score\s*:\s*([0-9.]+)")
-    }
+output_path = r"./accuracy_summary.txt"
 
-    with open(results_txt_path, "r", encoding="utf-8") as f:
-        text = f.read()
+# =========================
+# 정규식 패턴
+# =========================
+header_pattern = re.compile(
+    r"\[COLOR=(?P<color>\w+)\s*\|\s*STRATEGY=(?P<strategy>\d+)\]"
+)
 
-    values = {
-        k: np.array([float(v) for v in p.findall(text)])
-        for k, p in patterns.items()
-    }
+accuracy_pattern = re.compile(
+    r"Accuracy\s*:\s*(?P<acc>[0-9.]+)"
+)
 
-    avg = {k: v.mean() for k, v in values.items()}
-    var = {k: v.var()  for k, v in values.items()}
+# =========================
+# 데이터 수집
+# =========================
+accuracy_dict = defaultdict(list)
 
-    return avg, var, len(values["accuracy"])
+for file_path in input_files:
+    with open(file_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
 
-def write_avg_result(
-    save_path,
-    color,
-    strategy,
-    runs,
-    avg,
-    var
-):
-    with open(save_path, "a", encoding="utf-8") as f:
-        f.write("=" * 60 + "\n")
-        f.write("=== Test Results (AVERAGE + VARIANCE) ===\n")
-        f.write(f"Color      : {color}\n")
-        f.write(f"Strategy   : {strategy}\n")
-        f.write(f"Runs       : {runs}\n")
-        f.write("-" * 40 + "\n")
-        f.write(f"Accuracy   : {avg['accuracy']:.4f} ({var['accuracy']:.6f})\n")
-        f.write(f"Precision  : {avg['precision']:.4f} ({var['precision']:.6f})\n")
-        f.write(f"Recall     : {avg['recall']:.4f} ({var['recall']:.6f})\n")
-        f.write(f"F1-score   : {avg['f1']:.4f} ({var['f1']:.6f})\n")
-        f.write("\n")
+    current_color = None
+    current_strategy = None
 
-COLORS = ["gray", "color"]
-STRATEGIES = [1, 2, 3, 4]
-date = "20251230_04"
-write_result_txt = os.path.join("./results", f"{date}.txt")
-os.makedirs(os.path.dirname(write_result_txt), exist_ok=True)
+    for line in lines:
+        header_match = header_pattern.search(line)
+        if header_match:
+            current_color = header_match.group("color")
+            current_strategy = int(header_match.group("strategy"))
+            continue
 
-for color in COLORS:
-    for strategy in STRATEGIES:
-        BASE_MODEL_SAVE_DIR = os.path.join("./model", color, SUB_DIRS[strategy], date)
+        acc_match = accuracy_pattern.search(line)
+        if acc_match and current_color is not None:
+            acc_value = float(acc_match.group("acc"))
+            key = (current_color, current_strategy)
+            accuracy_dict[key].append(acc_value)
 
-        results_txt = os.path.join(BASE_MODEL_SAVE_DIR, "results.txt")
-        avg, var, runs = compute_avg_var_from_results(results_txt)
+# =========================
+# 결과 계산 및 저장
+# =========================
+with open(output_path, "w", encoding="utf-8") as out:
+    out.write("Accuracy Summary (Mean / Variance)\n")
+    out.write("=" * 50 + "\n\n")
 
-        write_avg_result(
-            write_result_txt,
-            color,
-            strategy,
-            runs,
-            avg,
-            var
-        )
+    count = 0
+    color_order = {"gray": 0, "color": 1}
+
+    for (color, strategy), values in sorted(accuracy_dict.items(), key=lambda x: (color_order.get(x[0][0], 99), x[0][1])):
+        values_np = np.array(values)
+        mean = values_np.mean()
+        var = values_np.var(ddof=0)  # 모집단 분산
+
+        out.write(f"[COLOR={color} | STRATEGY={strategy}]\n")
+        out.write(f"Accuracy: {mean:.6f} ({var:.6f})\n")
+        out.write("-" * 40 + "\n")
+        
+        count = len(values)
+        
+    # =========================
+    # 사용한 파일명 목록 추가
+    # =========================
+    out.write("\n")
+    out.write("=" * 50 + "\n")
+    out.write(f"Used Input Files (Count: {count})\n")
+    out.write("=" * 50 + "\n")
+
+    for file_path in input_files:
+        out.write(f"- {os.path.basename(file_path)}\n")
