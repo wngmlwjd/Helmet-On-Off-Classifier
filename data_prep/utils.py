@@ -3,49 +3,66 @@ import shutil
 import numpy as np
 import cv2
 
-DATASET_DIR = "./dataset"
-
-RAW_DATASET_DIR = DATASET_DIR + "/raw"
-RAW_IMAGES_DIR = RAW_DATASET_DIR + "/images"
-RAW_LABELS_DIR = RAW_DATASET_DIR + "/labels"
-
-FILTERED_DATASET_DIR = DATASET_DIR + "/filtered"
-FILTERED_IMAGES_DIR = FILTERED_DATASET_DIR + "/images"
-FILTERED_LABELS_DIR = FILTERED_DATASET_DIR + "/labels"
-
-CUT_DIR = DATASET_DIR + "/cut"
-CUT_IMAGES_DIR = CUT_DIR + "/images"
-CUT_LABELS_DIR = CUT_DIR + "/labels"
-
 FILTER_SIZE = (100, 100)  # 최소 bbox 크기 기준 (픽셀 기준)
 
 # TARGET_SIZE = (107, 128)  # 목표 크기 (width, height)
 TARGET_SIZE = (54, 64)  # 목표 크기 (width, height)
 TARGET_ASPECT_RATIO = 0.8384  # 목표 종횡비 (너비/높이)
 
-PREPROCESSED_DIR = DATASET_DIR + "/preprocessed"
+DATASET_DIR = "./dataset"
+
+RAW_DATASET_DIR = DATASET_DIR + "/01_raw"
+RAW_IMAGES_DIR = RAW_DATASET_DIR + "/images"
+RAW_LABELS_DIR = RAW_DATASET_DIR + "/labels"
+
+FILTERED_DATASET_DIR = DATASET_DIR + "/02_filtered"
+FILTERED_IMAGES_DIR = FILTERED_DATASET_DIR + "/images"
+FILTERED_LABELS_DIR = FILTERED_DATASET_DIR + "/labels"
+
+PREPROCESSED_DIR = DATASET_DIR + "/03_preprocessed"
 PREPROCESSED_COLOR_DIR = PREPROCESSED_DIR + "/color"
 PREPROCESSED_GRAY_DIR = PREPROCESSED_DIR + "/gray"
 
-DATASET_TYPES = {
-    'forced': "1. forced_scale",
-    'padded': "2. padded_scale",
-    'aware': "3. aspect_aware_crop",
-    'replicate': "4. replicate_padded_scale",
+SPLITED_DIR = DATASET_DIR + "/04_splited"
+
+TRAIN_DATASET_DIR = DATASET_DIR + "/train"
+TRAIN_IMAGES_DIR = TRAIN_DATASET_DIR + "/images"
+TRAIN_LABELS_DIR = TRAIN_DATASET_DIR + "/labels"
+
+TEST_DATASET_DIR = DATASET_DIR + "/test"
+TEST_IMAGES_DIR = TEST_DATASET_DIR + "/images"
+TEST_LABELS_DIR = TEST_DATASET_DIR + "/labels"
+
+# CUT_DIR = DATASET_DIR + "/cut"
+# CUT_IMAGES_DIR = CUT_DIR + "/images"
+# CUT_LABELS_DIR = CUT_DIR + "/labels"
+
+SUB_DIRS = {
+    1: '1. forced_scale',
+    2: '2. padded_scale',
+    3: '3. aspect_aware_crop',
+    4: '4. replicate_padded_scale',
 }
 
-OUTPUT_COLOR_DIRS = {
-    'forced': PREPROCESSED_COLOR_DIR + '/1. forced_scale',
-    'padded': PREPROCESSED_COLOR_DIR + '/2. padded_scale',
-    'aware':  PREPROCESSED_COLOR_DIR + '/3. aspect_aware_crop',
-    'replicate': PREPROCESSED_COLOR_DIR + '/4. replicate_padded_scale',
-}
-OUTPUT_GRAY_DIRS = {
-    'forced': PREPROCESSED_GRAY_DIR + '/1. forced_scale',
-    'padded': PREPROCESSED_GRAY_DIR + '/2. padded_scale',
-    'aware':  PREPROCESSED_GRAY_DIR + '/3. aspect_aware_crop',
-    'replicate': PREPROCESSED_GRAY_DIR + '/4. replicate_padded_scale',
-}
+# DATASET_TYPES = {
+#     'forced': "1. forced_scale",
+#     'padded': "2. padded_scale",
+#     'aware': "3. aspect_aware_crop",
+#     'replicate': "4. replicate_padded_scale",
+# }
+
+# OUTPUT_COLOR_DIRS = {
+#     'forced': PREPROCESSED_COLOR_DIR + '/1. forced_scale',
+#     'padded': PREPROCESSED_COLOR_DIR + '/2. padded_scale',
+#     'aware':  PREPROCESSED_COLOR_DIR + '/3. aspect_aware_crop',
+#     'replicate': PREPROCESSED_COLOR_DIR + '/4. replicate_padded_scale',
+# }
+# OUTPUT_GRAY_DIRS = {
+#     'forced': PREPROCESSED_GRAY_DIR + '/1. forced_scale',
+#     'padded': PREPROCESSED_GRAY_DIR + '/2. padded_scale',
+#     'aware':  PREPROCESSED_GRAY_DIR + '/3. aspect_aware_crop',
+#     'replicate': PREPROCESSED_GRAY_DIR + '/4. replicate_padded_scale',
+# }
 
 
 def clamp_coordinates(x_min, y_min, x_max, y_max, w, h):
@@ -101,42 +118,4 @@ def get_bbox_pixel_coords(line, w, h, target_aspect=None):
     x_min, y_min, x_max, y_max = clamp_coordinates(x_min, y_min, x_max, y_max, w, h)
     
     return cls, x_min, y_min, x_max, y_max
-
-def convert_color_to_gray():
-    print("컬러 이미지 → 흑백 이미지 변환 시작...")
-    
-    for key in OUTPUT_COLOR_DIRS:
-        color_image_dir = os.path.join(OUTPUT_COLOR_DIRS[key], 'images')
-        gray_image_dir  = os.path.join(OUTPUT_GRAY_DIRS[key], 'images')
-        color_label_dir = os.path.join(OUTPUT_COLOR_DIRS[key], 'labels')
-        gray_label_dir  = os.path.join(OUTPUT_GRAY_DIRS[key], 'labels')
-        
-        # 디렉터리 없으면 생성
-        os.makedirs(gray_image_dir, exist_ok=True)
-        os.makedirs(gray_label_dir, exist_ok=True)
-        
-        # --- 이미지 변환 ---
-        files = sorted(f for f in os.listdir(color_image_dir) if f.lower().endswith(('.jpg', '.png', '.jpeg')))
-        for file_name in files:
-            color_path = os.path.join(color_image_dir, file_name)
-            gray_path  = os.path.join(gray_image_dir, file_name)  # 파일명 그대로
-            
-            img = cv2.imread(color_path)
-            if img is None:
-                print(f"  ⚠️ 이미지 읽기 실패: {color_path}")
-                continue
-            
-            gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            cv2.imwrite(gray_path, gray_img)
-            print(f"  ✅ 저장 완료: {gray_path}")
-        
-        # --- 라벨 복사 ---
-        label_files = sorted(f for f in os.listdir(color_label_dir) if f.endswith('.txt'))
-        for label_file in label_files:
-            src_label = os.path.join(color_label_dir, label_file)
-            dst_label = os.path.join(gray_label_dir, label_file)
-            shutil.copy2(src_label, dst_label)  # 메타데이터까지 포함해서 복사
-            print(f"  ✅ 라벨 복사 완료: {dst_label}")
-    
-    print("모든 이미지 흑백 변환 및 라벨 복사 완료!")
 

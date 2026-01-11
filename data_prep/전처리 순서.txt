@@ -1,3 +1,4 @@
-1. preprocessing.py
-2. color_to_gray.py
-3. seperating.py
+1. filtering.py
+2. preprocessing.py
+3. color_to_gray.py
+4. seperating.py

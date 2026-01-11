@@ -2,63 +2,65 @@ import os
 import shutil
 import random
 
-from data_prep.utils import OUTPUT_COLOR_DIRS, OUTPUT_GRAY_DIRS, DATASET_TYPES
+from data_prep.utils import PREPROCESSED_DIR, SUB_DIRS, SPLITED_DIR, TRAIN_DATASET_DIR, TRAIN_IMAGES_DIR, TRAIN_LABELS_DIR, TEST_DATASET_DIR, TEST_IMAGES_DIR, TEST_LABELS_DIR
 
-# train/test 비율
-TRAIN_RATIO = 0.9
 
-def split_train_test_uniform(color_dirs, gray_dirs, output_root_color, output_root_gray):
-    """
-    모든 데이터셋(color/gray 각 3종류)에 동일한 train/test 분할 적용
-    """
-    # 1) 기준이 될 이미지 목록 생성 (color forced_scale 기준)
-    base_dir = list(color_dirs.values())[0]  # 첫 번째 컬러 폴더 사용
-    img_dir = os.path.join(base_dir, "images")
+def split_fold(color, strategy, n_folds):
+    # 1) 기준이 될 이미지 목록 생성
+    img_dir = os.path.join(PREPROCESSED_DIR, color, SUB_DIRS[strategy], "images")
     img_files = sorted(f for f in os.listdir(img_dir) if f.lower().endswith(('.jpg','.png','.jpeg')))
     
     random.shuffle(img_files)
-    n_train = int(len(img_files) * TRAIN_RATIO)
-    train_files = img_files[:n_train]
-    test_files = img_files[n_train:]
+    n = int(len(img_files) / n_folds)
     
-    print(f"총 {len(img_files)}개 이미지 → train: {len(train_files)}, test: {len(test_files)}")
+    if os.path.exists(SPLITED_DIR):
+        shutil.rmtree(SPLITED_DIR)
+    os.makedirs(SPLITED_DIR, exist_ok=True)
+    
+    fold_num = 1
+    for idx, img_file in enumerate(img_files):
+        os.makedirs(os.path.join(PREPROCESSED_DIR, color, SUB_DIRS[strategy], "images"), exist_ok=True)
+        os.makedirs(os.path.join(SPLITED_DIR, f"fold_{fold_num:02d}", "images"), exist_ok=True)
+        os.makedirs(os.path.join(PREPROCESSED_DIR, color, SUB_DIRS[strategy], "labels"), exist_ok=True)
+        os.makedirs(os.path.join(SPLITED_DIR, f"fold_{fold_num:02d}", "labels"), exist_ok=True)
+        
+        src_img_path = os.path.join(PREPROCESSED_DIR, color, SUB_DIRS[strategy], "images", img_file)
+        dst_img_path = os.path.join(SPLITED_DIR, f"fold_{fold_num:02d}", "images", img_file)
+        if os.path.exists(src_img_path):
+            shutil.copy2(src_img_path, dst_img_path)
 
-    # 2) 모든 컬러/그레이 데이터셋에 동일하게 적용
-    for dataset_type, dirs_dict in [("color", color_dirs), ("gray", gray_dirs)]:
-        output_root = output_root_color if dataset_type=="color" else output_root_gray
-        for subset_type, dir_path in dirs_dict.items():
-            img_dir = os.path.join(dir_path, "images")
-            label_dir = os.path.join(dir_path, "labels")
-
-            for split_name, files in zip(["train", "test"], [train_files, test_files]):
-                out_img_dir = os.path.join(output_root, split_name, DATASET_TYPES[subset_type], "images")
-                out_label_dir = os.path.join(output_root, split_name, DATASET_TYPES[subset_type], "labels")
-                os.makedirs(out_img_dir, exist_ok=True)
-                os.makedirs(out_label_dir, exist_ok=True)
-
-                for img_file in files:
-                    src_img_path = os.path.join(img_dir, img_file)
-                    dst_img_path = os.path.join(out_img_dir, img_file)
-                    if os.path.exists(src_img_path):
-                        shutil.copy2(src_img_path, dst_img_path)
-
-                    label_file = img_file.replace("image", "label").replace(".jpg", ".txt")
-                    src_label_path = os.path.join(label_dir, label_file)
-                    dst_label_path = os.path.join(out_label_dir, label_file)
-                    if os.path.exists(src_label_path):
-                        shutil.copy2(src_label_path, dst_label_path)
-
-                print(f"✅ {dataset_type} {subset_type} → {split_name}: {len(files)}개 파일 복사 완료")
-
-if __name__ == "__main__":
-    random.seed(42)  # 재현성
-
-    print("=== Color/Gray 데이터셋 동일 train/test 분리 ===")
-    split_train_test_uniform(
-        OUTPUT_COLOR_DIRS,
-        OUTPUT_GRAY_DIRS,
-        output_root_color="dataset/preprocessed/color",
-        output_root_gray="dataset/preprocessed/gray"
-    )
-
-    print("\n모든 데이터셋 train/test 분리 완료!")
+        label_file = img_file.replace("image", "label").replace(".jpg", ".txt")
+        src_label_path = os.path.join(PREPROCESSED_DIR, color, SUB_DIRS[strategy], "labels", label_file)
+        dst_label_path = os.path.join(SPLITED_DIR, f"fold_{fold_num:02d}", "labels", label_file)
+        if os.path.exists(src_label_path):
+            shutil.copy2(src_label_path, dst_label_path)
+            
+        if (idx + 1) % n == 0 and fold_num < n_folds:
+            fold_num += 1
+            
+def split_train_test(test_fold_num):
+    if os.path.exists(TRAIN_DATASET_DIR):
+        shutil.rmtree(TRAIN_DATASET_DIR)
+    os.makedirs(TRAIN_IMAGES_DIR, exist_ok=True)
+    os.makedirs(TRAIN_LABELS_DIR, exist_ok=True)
+    if os.path.exists(TEST_DATASET_DIR):
+        shutil.rmtree(TEST_DATASET_DIR)
+    os.makedirs(TEST_IMAGES_DIR, exist_ok=True)
+    os.makedirs(TEST_LABELS_DIR, exist_ok=True)
+    
+    for fold_num in range (len(os.listdir(SPLITED_DIR))):
+        fold_num += 1
+        src_dir = os.path.join(SPLITED_DIR, f"fold_{fold_num:02d}")
+        src_img_dir = os.path.join(src_dir, "images")
+        src_label_dir = os.path.join(src_dir, "labels")
+        
+        if fold_num == test_fold_num:
+            for img_file in os.listdir(src_img_dir):
+                shutil.copy2(os.path.join(src_img_dir, img_file), os.path.join(TEST_IMAGES_DIR, img_file))
+                label_file = img_file.replace("image", "label").replace(".jpg", ".txt")
+                shutil.copy2(os.path.join(src_label_dir, label_file), os.path.join(TEST_LABELS_DIR, label_file))
+        else:
+            for img_file in os.listdir(src_img_dir):
+                shutil.copy2(os.path.join(src_img_dir, img_file), os.path.join(TRAIN_IMAGES_DIR, img_file))
+                label_file = img_file.replace("image", "label").replace(".jpg", ".txt")
+                shutil.copy2(os.path.join(src_label_dir, label_file), os.path.join(TRAIN_LABELS_DIR, label_file))
