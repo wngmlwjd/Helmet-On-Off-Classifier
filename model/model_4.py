@@ -12,11 +12,11 @@ def main_cnn(selected_color):
 
     inputs = tf.keras.Input(shape=(h, w, d))
 
-    # 1번째 Conv + MaxPooling
+    # 1번째 Conv + AveragePooling
     x = layers.Conv2D(6, 5, padding="same", activation="sigmoid")(inputs)
     x = layers.AveragePooling2D(pool_size=2)(x)
 
-    # 2번째 Conv + MaxPooling
+    # 2번째 Conv + AveragePooling
     x = layers.Conv2D(16, 5, activation="sigmoid")(x)
     x = layers.AveragePooling2D(pool_size=2)(x)
 
