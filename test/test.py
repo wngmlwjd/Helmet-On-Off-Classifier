@@ -107,6 +107,15 @@ def test_model(selected_color, selected_strategy, model_path, epoch):
     precision = precision_score(y_true, y_pred)
     recall    = recall_score(y_true, y_pred)
     f1        = f1_score(y_true, y_pred)
+    
+    # -------------------------------
+    # 정답 / 오답 개수
+    # -------------------------------
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+
+    correct_count = tp + tn
+    wrong_count   = fp + fn
+    total_count   = correct_count + wrong_count
 
     # -------------------------------
     # 결과 저장 (TXT)
@@ -115,6 +124,10 @@ def test_model(selected_color, selected_strategy, model_path, epoch):
         f"=== Test Results (Epoch {epoch}) ===\n"
         f"Color      : {selected_color}\n"
         f"Strategy   : {selected_strategy}\n"
+        f"Total      : {total_count}\n"
+        f"Correct    : {correct_count}\n"
+        f"Wrong      : {wrong_count}\n"
+        f"\n"
         f"Accuracy   : {accuracy:.4f}\n"
         f"Precision  : {precision:.4f}\n"
         f"Recall     : {recall:.4f}\n"
@@ -169,5 +182,8 @@ def test_model(selected_color, selected_strategy, model_path, epoch):
         "accuracy": accuracy,
         "precision": precision,
         "recall": recall,
-        "f1": f1
+        "f1": f1,
+        "correct_count": correct_count,
+        "wrong_count": wrong_count,
+        "total_count": total_count
     }

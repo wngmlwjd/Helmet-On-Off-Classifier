@@ -15,13 +15,15 @@ from test.test import test_model
 # ===============================
 # 실험 설정
 # ===============================
-COLORS = ["gray", "color"]
-STRATEGIES = [1, 2, 3, 4]
+# COLORS = ["gray", "color"]
+COLORS = ["color"]
+# STRATEGIES = [1, 2, 3, 4]
+STRATEGIES = [2]
 
 N_FOLDS = 5
 VAL_SPLIT_RATIO = 0.2
 
-for _ in range(5):
+for _ in range(10):
     # ===============================
     # 결과 파일 생성
     # ===============================
@@ -37,7 +39,7 @@ for _ in range(5):
     with open(RESULTS_PATH, "w", encoding="utf-8") as f:
         f.write(f"통합 실험 결과\n")
         f.write(f"시작 시간: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write(f"모델: 4\n")
+        f.write(f"모델: 17\n")
         f.write("=" * 60 + "\n\n")
 
     # ===============================
@@ -64,6 +66,9 @@ for _ in range(5):
                 "f1": []
             }
 
+            CORRECT = 0
+            WRONG = 0
+            TOTAL = 0
             for run in range(N_FOLDS):
                 run += 1
                     
@@ -80,7 +85,8 @@ for _ in range(5):
                 best_epoch = train_results["best_epoch"]
                 best_val_acc = train_results["best_val_acc"]
                 
-                best_model_path = os.path.join(TRAIN_MODEL_SAVE_DIR, f"epoch_{best_epoch:02d}.h5")
+                # best_model_path = os.path.join(TRAIN_MODEL_SAVE_DIR, f"epoch_{best_epoch:02d}.h5")
+                best_model_path = os.path.join(TRAIN_MODEL_SAVE_DIR, f"best_model.h5")
 
                 # =====================
                 # 테스트
@@ -91,6 +97,10 @@ for _ in range(5):
                 metric_values["precision"].append(test_results["precision"])
                 metric_values["recall"].append(test_results["recall"])
                 metric_values["f1"].append(test_results["f1"])
+                
+                CORRECT += test_results["correct_count"]
+                WRONG   += test_results["wrong_count"]
+                TOTAL   += test_results["total_count"]
 
                 # =====================
                 # 결과 누적 기록
@@ -105,6 +115,10 @@ for _ in range(5):
                     f.write(f"Precision : {test_results['precision']:.4f}\n")
                     f.write(f"Recall    : {test_results['recall']:.4f}\n")
                     f.write(f"F1-score  : {test_results['f1']:.4f}\n")
+                    f.write("--------------------\n")
+                    f.write(f"Total     : {test_results['total_count']}\n")
+                    f.write(f"Correct   : {test_results['correct_count']}\n")
+                    f.write(f"Wrong     : {test_results['wrong_count']}\n")
                     f.write("=" * 40 + "\n\n")
 
             avg_acc  = np.mean(metric_values["accuracy"])
@@ -120,10 +134,16 @@ for _ in range(5):
             avg_result_path = os.path.join(BASE_MODEL_SAVE_DIR, f"results_AVG_VAR.txt")
 
             with open(avg_result_path, "w", encoding="utf-8") as f:
-                f.write("=== Test Results (AVERAGE + VARIANCE) ===\n")
+                f.write("=== Test Results ===\n")
                 f.write(f"Color      : {color}\n")
                 f.write(f"Strategy   : {strategy}\n")
                 f.write(f"{'-'*40}\n")
+                f.write(f"Total      : {TOTAL}\n")
+                f.write(f"Correct    : {CORRECT}\n")
+                f.write(f"Wrong      : {WRONG}\n")
+                f.write(f"Accuracy   : {(CORRECT/TOTAL):.4f}\n")
+                f.write(f"Error-rate : {(WRONG/TOTAL):.4f}\n")
+                f.write(f"------ (AVERAGE + VARIANCE) ------\n")
                 f.write(f"Accuracy   : {avg_acc:.4f} ({var_acc:.6f})\n")
                 f.write(f"Precision  : {avg_prec:.4f} ({var_prec:.6f})\n")
                 f.write(f"Recall     : {avg_rec:.4f} ({var_rec:.6f})\n")
@@ -131,6 +151,12 @@ for _ in range(5):
 
             with open(RESULTS_PATH, "a", encoding="utf-8") as f:
                 f.write(f"[COLOR={color} | STRATEGY={strategy}]\n")
+                f.write(f"{'-'*40}\n")
+                f.write(f"Total      : {TOTAL}\n")
+                f.write(f"Correct    : {CORRECT}\n")
+                f.write(f"Wrong      : {WRONG}\n")
+                f.write(f"Accuracy   : {(CORRECT/TOTAL):.4f}\n")
+                f.write(f"Error-rate : {(WRONG/TOTAL):.4f}\n")
                 f.write(f"{'-'*40}\n")
                 f.write(f"Accuracy   : {avg_acc:.4f} ({var_acc:.6f})\n")
                 f.write(f"Precision  : {avg_prec:.4f} ({var_prec:.6f})\n")

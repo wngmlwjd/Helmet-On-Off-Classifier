@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 from data_prep.utils import TRAIN_DATASET_DIR, TRAIN_IMAGES_DIR, TRAIN_LABELS_DIR, TEST_DATASET_DIR, TEST_IMAGES_DIR, TEST_LABELS_DIR
 from train.utils import HELMET_CLASS_ID, IMG_SIZE, BATCH_SIZE, EPOCHS
-from model.model_4 import main_cnn 
+from model.model_17 import main_cnn 
 
 # ===============================
 # 이미지 로드 함수
@@ -111,9 +111,12 @@ def train_model(selected_color, selected_strategy, model_save_dir, val_split_rat
     # Callbacks
     # -------------------------------
     checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-        filepath=os.path.join(model_save_dir, "epoch_{epoch:02d}.h5"),
+        filepath=os.path.join(model_save_dir, "best_model.h5"),
+        monitor="val_accuracy",      # 또는 "val_loss"
+        mode="max",                  # val_loss 쓰면 "min"
+        save_best_only=True,
         save_weights_only=False,
-        save_freq="epoch"
+        verbose=1
     )
     earlystop_cb = tf.keras.callbacks.EarlyStopping(
         monitor="val_loss",

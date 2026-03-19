@@ -33,9 +33,9 @@ TEST_DATASET_DIR = DATASET_DIR + "/test"
 TEST_IMAGES_DIR = TEST_DATASET_DIR + "/images"
 TEST_LABELS_DIR = TEST_DATASET_DIR + "/labels"
 
-# CUT_DIR = DATASET_DIR + "/cut"
-# CUT_IMAGES_DIR = CUT_DIR + "/images"
-# CUT_LABELS_DIR = CUT_DIR + "/labels"
+CUT_DIR = DATASET_DIR + "/cut"
+CUT_IMAGES_DIR = CUT_DIR + "/images"
+CUT_LABELS_DIR = CUT_DIR + "/labels"
 
 SUB_DIRS = {
     1: '1. forced_scale',
