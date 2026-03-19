@@ -92,7 +92,7 @@ def get_bbox_pixel_coords(line, w, h, target_aspect=None):
     x_max = (x_center + width / 2) * w
     y_max = (y_center + height / 2) * h
 
-    # --- Aspect-Ratio Adjustment (Strategy 3 only) ---
+    # Aspect-Ratio Adjustment (Strategy 3 only)
     if target_aspect is not None and target_aspect > 0:
         current_w = x_max - x_min
         current_h = y_max - y_min

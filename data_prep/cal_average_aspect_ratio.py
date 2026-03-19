@@ -53,7 +53,7 @@ def compute_bbox_statistics():
             heights.append(bbox_h)
             ratios.append(bbox_w / bbox_h)
 
-    # ===== 출력 =====
+    # 출력
     if widths:
         avg_w = sum(widths) / len(widths)
         avg_h = sum(heights) / len(heights)
