@@ -1,0 +1,11 @@
+=== Test Results (Epoch 26) ===
+Color      : gray
+Strategy   : 1
+Total      : 626
+Correct    : 575
+Wrong      : 51
+
+Accuracy   : 0.9185
+Precision  : 0.9059
+Recall     : 0.9622
+F1-score   : 0.9332

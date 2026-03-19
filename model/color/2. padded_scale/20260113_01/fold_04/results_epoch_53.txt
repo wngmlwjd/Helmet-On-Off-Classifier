@@ -1,0 +1,11 @@
+=== Test Results (Epoch 53) ===
+Color      : color
+Strategy   : 2
+Total      : 626
+Correct    : 549
+Wrong      : 77
+
+Accuracy   : 0.8770
+Precision  : 0.8786
+Recall     : 0.9189
+F1-score   : 0.8983

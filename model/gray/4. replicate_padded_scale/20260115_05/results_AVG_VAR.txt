@@ -1,0 +1,14 @@
+=== Test Results ===
+Color      : gray
+Strategy   : 4
+----------------------------------------
+Total      : 3130
+Correct    : 2849
+Wrong      : 281
+Accuracy   : 0.9102
+Error-rate : 0.0898
+------ (AVERAGE + VARIANCE) ------
+Accuracy   : 0.9102 (0.000122)
+Precision  : 0.9212 (0.000161)
+Recall     : 0.9336 (0.000226)
+F1-score   : 0.9272 (0.000075)

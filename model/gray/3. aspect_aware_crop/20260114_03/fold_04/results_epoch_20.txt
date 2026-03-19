@@ -1,0 +1,11 @@
+=== Test Results (Epoch 20) ===
+Color      : gray
+Strategy   : 3
+Total      : 626
+Correct    : 557
+Wrong      : 69
+
+Accuracy   : 0.8898
+Precision  : 0.9127
+Recall     : 0.9055
+F1-score   : 0.9091

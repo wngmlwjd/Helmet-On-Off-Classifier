@@ -1,0 +1,11 @@
+=== Test Results (Epoch 41) ===
+Color      : color
+Strategy   : 3
+Total      : 626
+Correct    : 540
+Wrong      : 86
+
+Accuracy   : 0.8626
+Precision  : 0.9183
+Recall     : 0.8512
+F1-score   : 0.8835

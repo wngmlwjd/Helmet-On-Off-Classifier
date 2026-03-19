@@ -1,0 +1,11 @@
+=== Test Results (Epoch 83) ===
+Color      : gray
+Strategy   : 3
+Total      : 626
+Correct    : 526
+Wrong      : 100
+
+Accuracy   : 0.8403
+Precision  : 0.8705
+Recall     : 0.8705
+F1-score   : 0.8705

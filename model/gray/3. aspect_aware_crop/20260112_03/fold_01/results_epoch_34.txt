@@ -1,0 +1,11 @@
+=== Test Results (Epoch 34) ===
+Color      : gray
+Strategy   : 3
+Total      : 626
+Correct    : 529
+Wrong      : 97
+
+Accuracy   : 0.8450
+Precision  : 0.8568
+Recall     : 0.8990
+F1-score   : 0.8774

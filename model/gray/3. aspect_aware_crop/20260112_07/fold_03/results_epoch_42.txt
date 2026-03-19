@@ -1,0 +1,11 @@
+=== Test Results (Epoch 42) ===
+Color      : gray
+Strategy   : 3
+Total      : 626
+Correct    : 535
+Wrong      : 91
+
+Accuracy   : 0.8546
+Precision  : 0.9027
+Recall     : 0.8586
+F1-score   : 0.8801
